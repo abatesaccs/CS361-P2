@@ -88,8 +88,7 @@ public class NFA implements NFAInterface{
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getToState'");
+        return from.getTransition(onSymb);
     }
 
     @Override
@@ -106,8 +105,15 @@ public class NFA implements NFAInterface{
 
     @Override
     public boolean addTransition(String fromState, Set<String> toStates, char onSymb) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addTransition'");
+        NFAState from = (NFAState)getState(fromState); // get state from name
+        for (String state : toStates) { // for each state in the set of toStates
+            NFAState temp = (NFAState)getState(state); // get state from name
+            if(from != null && temp != null && Sigma.contains(onSymb)) {
+                from.addTransition(onSymb, temp);
+                return true; // added one or more states
+            }
+        }
+        return false; // added no states
     }
 
     @Override
@@ -116,6 +122,8 @@ public class NFA implements NFAInterface{
         throw new UnsupportedOperationException("Unimplemented method 'isDFA'");
     }
     
+    // toString method will need to be modified for NFA
+
     // public String toString() {
 	    // StringBuilder sb = new StringBuilder();
 	    // sb.append("Q = { ");
