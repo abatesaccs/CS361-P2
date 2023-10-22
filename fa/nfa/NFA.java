@@ -2,6 +2,7 @@ package fa.nfa;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Stack;
 
 import fa.State;
 
@@ -92,9 +93,22 @@ public class NFA implements NFAInterface{
     }
 
     @Override
+    // TODO: Untested
     public Set<NFAState> eClosure(NFAState s) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'eClosure'");
+        Stack<NFAState> stack = new Stack<>();
+        Set<NFAState> closureStates = new LinkedHashSet<>();
+        stack.push(s);
+        while(!stack.isEmpty()) {
+            NFAState current = stack.pop();
+            closureStates.add(current);
+            Set<NFAState> states = current.getTransition('e');
+            if(states != null){
+                for (NFAState nfaState : states) {
+                    stack.push(nfaState);
+                }
+            }
+        }
+        return closureStates;
     }
 
     @Override
@@ -108,7 +122,8 @@ public class NFA implements NFAInterface{
         NFAState from = (NFAState)getState(fromState); // get state from name
         for (String state : toStates) { // for each state in the set of toStates
             NFAState temp = (NFAState)getState(state); // get state from name
-            if(from != null && temp != null && Sigma.contains(onSymb)) {
+            // Make needed checks, allow epsilon transitions to be added w/o being in aplhabet
+            if(from != null && temp != null && (Sigma.contains(onSymb) || onSymb == 'e')) {
                 from.addTransition(onSymb, temp);
                 return true; // added one or more states
             }
