@@ -1,15 +1,32 @@
 package fa.nfa;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import fa.State;
 
 public class NFA implements NFAInterface{
+    private Set<NFAState> Q; // set of states
+    private Set<Character> Sigma; // alphabet
+    private NFAState q0; // start state
+    private Set<NFAState> F; // set of final states
+
+    public NFA() {
+        this.Q = new LinkedHashSet<>();
+        this.Sigma = new LinkedHashSet<>();
+        this.F = new LinkedHashSet<>();
+    }
 
     @Override
     public boolean addState(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addState'");
+        for(NFAState state : Q) {
+            if(state.getName().equals(name)) {
+                return false;
+            }
+        }
+
+        Q.add(new NFAState(name));
+        return true;
     }
 
     @Override
@@ -26,8 +43,7 @@ public class NFA implements NFAInterface{
 
     @Override
     public void addSigma(char symbol) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addSigma'");
+        Sigma.add(symbol);
     }
 
     @Override
