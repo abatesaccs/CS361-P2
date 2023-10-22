@@ -13,4 +13,15 @@ public class NFAState extends State{
         super(name);
         transitions = new HashMap<>();
     }
+
+    public void addTransition(char onSymb, NFAState toState) {
+        Set<NFAState> temp = transitions.get(onSymb);
+        if(temp != null && !temp.contains(toState)) {
+            temp.add(toState);
+        }
+    }
+
+    public Set<NFAState> getTransition(char onSymb) {
+        return transitions.get(onSymb);
+    }
 }
