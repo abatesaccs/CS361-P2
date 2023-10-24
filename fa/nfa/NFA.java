@@ -17,6 +17,11 @@ public class NFA implements NFAInterface{
     private NFAState q0; // start state
     private Set<NFAState> F; // set of final states
 
+    /**
+     * Default constructor for the non-deterministic finite automata
+     * initializes the set of states (Q), the alphabet (Sigma), 
+     * and the set of final states (F) as empty sets.
+     */
     public NFA() {
         this.Q = new LinkedHashSet<>();
         this.Sigma = new LinkedHashSet<>();
@@ -65,11 +70,13 @@ public class NFA implements NFAInterface{
     public boolean accepts(String s) {
         Set<NFAState> current = eClosure(q0);
 
+        // iterate each character in string
         for (char c : s.toCharArray()) {
             Set<NFAState> next = new LinkedHashSet<>();
-
+            
+            // iterate current states and get next states from transitions
             for (NFAState state : current) {
-                Set<NFAState> transitionalStates = state.getTransition(c);
+                Set<NFAState> transitionalStates = state.toStates(c);
                 
                 if (transitionalStates != null) {
                     next.addAll(transitionalStates);
@@ -78,12 +85,13 @@ public class NFA implements NFAInterface{
 
             current.clear();
             
+            // get eclosure for each next state
             for (NFAState nextState : next) {
                 current.addAll(eClosure(nextState));
             }
         }
 
-        // check set of final states
+        // check if any are final states
         for (NFAState state : current) {
             if (F.contains(state)) {
                 return true;  // string is accepted
@@ -121,7 +129,7 @@ public class NFA implements NFAInterface{
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        return from.getTransition(onSymb);
+        return from.toStates(onSymb);
     }
 
     @Override
@@ -129,13 +137,15 @@ public class NFA implements NFAInterface{
         Stack<NFAState> stack = new Stack<>();
         Set<NFAState> eClosure = new LinkedHashSet<>();
         stack.push(s);
-        // dfs search
+        
+        // dfs search for eclosure of a state
         while(!stack.isEmpty()) {
             NFAState current = stack.pop();
             eClosure.add(current);
-            Set<NFAState> states = current.getTransition('e');
+            Set<NFAState> states = current.toStates('e');
             
             if(states != null){
+            	// push states that are connected onto stack
                 for (NFAState nfaState : states) {
                 	if(!eClosure.contains(nfaState)) {
                 		stack.push(nfaState);
@@ -153,12 +163,13 @@ public class NFA implements NFAInterface{
         Set<NFAState> current = eClosure(q0);
         maxCopies = Math.max(maxCopies, current.size());
 
-        // traverse string
+        // traverse string and get number of copies
         for (char c : s.toCharArray()) {
             Set<NFAState> next = new LinkedHashSet<>();
 
+            // iterate current states and get next states
             for (NFAState state : current) {
-                Set<NFAState> transitionalStates = state.getTransition(c);
+                Set<NFAState> transitionalStates = state.toStates(c);
                 if (transitionalStates != null) {
                     next.addAll(transitionalStates);
                 }
@@ -166,11 +177,12 @@ public class NFA implements NFAInterface{
 
             current.clear();
             
+            // get eclosure for next states
             for (NFAState nextState : next) {
                 current.addAll(eClosure(nextState));
             }
 
-            // current states is greater than maxCopies so update
+            // update our maxCopies
             maxCopies = Math.max(maxCopies, current.size());
         }
 
@@ -196,12 +208,12 @@ public class NFA implements NFAInterface{
     public boolean isDFA() {
         for (NFAState state : Q) {  // for every state in the NFA
             for (char symbol : Sigma) {  // for every symbol in the alphabet
-                Set<NFAState> transitionalStates = state.getTransition(symbol);
+                Set<NFAState> transitionalStates = state.toStates(symbol);
                 if (transitionalStates == null || transitionalStates.size() != 1) {  // if there is no transition or more than one transition for a given symbol
                     return false;
                 }
             }
-            if (state.getTransition('e') != null) {  // if there is an epsilon transition
+            if (state.toStates('e') != null) {  // if there is an epsilon transition
                 return false;
             }
         }
@@ -227,7 +239,7 @@ public class NFA implements NFAInterface{
         for (NFAState state : Q) {
             sb.append(state.getName());
             for (char c : Sigma) {
-                Set<NFAState> transitionalStates = state.getTransition(c);
+                Set<NFAState> transitionalStates = state.toStates(c);
                 sb.append("\t");
                 if (transitionalStates != null) {
                     sb.append("{ ");
@@ -241,7 +253,13 @@ public class NFA implements NFAInterface{
             }
             sb.append("\n");
         }
-        sb.append("q0 = ").append(q0.getName()).append("\nF = { ");
+        sb.append("q0 = ");
+        if (q0 != null) {
+            sb.append(q0.getName());
+        } else {
+            sb.append("undefined");
+        }
+        sb.append("\n");
         for (NFAState state : F) {
             sb.append(state.getName()).append(" ");
         }
